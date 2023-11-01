@@ -1,26 +1,32 @@
 "use client";
-import {api} from '@/../convex/_generated/api'
-
+import { api } from "@/../convex/_generated/api";
 
 // icons
-import { ChevronsLeft, MenuIcon } from "lucide-react";
+import { ChevronsLeft, MenuIcon, Plus, PlusCircle, Search, Settings, Trash } from "lucide-react";
 
 //hooks and react
 import { useMediaQuery } from "usehooks-ts";
 import { usePathname } from "next/navigation";
 import { ElementRef, useRef, useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
-import {useQuery} from 'convex/react'
+import { useMutation } from "convex/react";
 
 // COmponents
 import { UserItem } from "@/app/(main)/_components/UserItem";
+import { Item } from "@/app/(main)/_components/Item";
+import { toast } from "sonner";
+import { DocumentList } from "@/app/(main)/_components/DocumentList";
+import { Popover, PopoverTrigger } from "@/components/ui/popover";
+import { PopoverContent } from "@radix-ui/react-popover";
+import { TrashBox } from "@/app/(main)/_components/trashbox";
 
 // Sidebar component
 export const Navigation = () => {
   // calling for hooks
   const pathname = usePathname();
   const isMobile = useMediaQuery("(max-width: 768px)");
-  const documents = useQuery(api.document.get)
+  const create = useMutation(api.document.create)
+
 
   const isResizingRef = useRef(false);
   const sidebarRef = useRef<ElementRef<"aside">>(null);
@@ -30,18 +36,18 @@ export const Navigation = () => {
 
   // UseEffect to make sidebar fill all the screen while is mobile screen
   useEffect(() => {
-    if(isMobile){
-        collapse()
-    }else {
-        resetWidth()
+    if (isMobile) {
+      collapse();
+    } else {
+      resetWidth();
     }
-  }, [isMobile])
+  }, [isMobile]);
 
   useEffect(() => {
-    if(isMobile){
-        collapse()
+    if (isMobile) {
+      collapse();
     }
-  }, [pathname, isMobile])
+  }, [pathname, isMobile]);
   // function responsable to resize the sidebar
   const handleMouseDown = (
     event: React.MouseEvent<HTMLDivElement, MouseEvent>
@@ -98,17 +104,27 @@ export const Navigation = () => {
     }
   };
 
-    // set sidebar width to 0 making desappear
+  // set sidebar width to 0 making desappear
   const collapse = () => {
-    if(sidebarRef.current && navbarRef.current){
-        setIsCollapsed(true)
-        setIsResetting(true)
+    if (sidebarRef.current && navbarRef.current) {
+      setIsCollapsed(true);
+      setIsResetting(true);
 
-        sidebarRef.current.style.width = '0'
-        navbarRef.current.style.setProperty( 'width', '100%')
-        navbarRef.current.style.setProperty('left', '0')
-        setTimeout(() => setIsResetting(false), 300)
+      sidebarRef.current.style.width = "0";
+      navbarRef.current.style.setProperty("width", "100%");
+      navbarRef.current.style.setProperty("left", "0");
+      setTimeout(() => setIsResetting(false), 300);
     }
+  };
+
+  const handleCreate = () => {
+    const promise = create({title: 'Untitled'})
+  
+    toast.promise(promise, {
+      loading: 'Creating a new note...',
+      success: 'New note created.',
+      error: 'Failed to reate a new note.'
+    })
   }
 
   return (
@@ -132,14 +148,22 @@ export const Navigation = () => {
           <ChevronsLeft className="h-6 w-6" />
         </div>
         <div>
-            <UserItem />
+          <UserItem />
+          <Item label="Search" icon={Search} isSearch onClick={() => {}}/>
+          <Item label="Settings" icon={Settings} isSearch onClick={() => {}}/>
+          <Item onClick={handleCreate} label="New page" icon={PlusCircle} />
         </div>
         <div className="mt-4">
-            {documents?.map((document) => (
-              <p key={document._id}>
-                {document.title}
-                </p>
-            ))}
+            <DocumentList />
+            <Item onClick={handleCreate} icon={Plus} label="Add a page" />
+            <Popover>
+                <PopoverTrigger className="w-full mt-4">
+                  <Item label="Trash" icon={Trash} />
+                </PopoverTrigger>
+                <PopoverContent side={isMobile ? 'bottom' : 'right'}>
+                  <TrashBox />
+                </PopoverContent>
+            </Popover>
         </div>
         <div
           onMouseDown={handleMouseDown}
@@ -157,7 +181,11 @@ export const Navigation = () => {
       >
         <nav className="bg-transparent px-3 py-2 w-full">
           {isCollapsed && (
-            <MenuIcon onClick={resetWidth} className="h-6 w-6 text-muted-foreground" role="button" />
+            <MenuIcon
+              onClick={resetWidth}
+              className="h-6 w-6 text-muted-foreground"
+              role="button"
+            />
           )}
         </nav>
       </div>
