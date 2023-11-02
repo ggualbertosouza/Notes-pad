@@ -1,6 +1,13 @@
 "Use client";
 
-import { ChevronRight, ChevronDown, LucideIcon, Plus, MoreHorizontal, Trash } from "lucide-react";
+import {
+  ChevronRight,
+  ChevronDown,
+  LucideIcon,
+  Plus,
+  MoreHorizontal,
+  Trash,
+} from "lucide-react";
 
 import { Id } from "@/../convex/_generated/dataModel";
 import { cn } from "@/lib/utils";
@@ -10,14 +17,14 @@ import { useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import {useUser} from '@clerk/clerk-react'
+import { useUser } from "@clerk/clerk-react";
 
-import { 
-  DropdownMenuTrigger, 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuSeparator 
+import {
+  DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 
 interface ItemProps {
@@ -45,22 +52,22 @@ export const Item = ({
   onClick,
   icon: Icon,
 }: ItemProps) => {
-  const {user} = useUser()
-  const router = useRouter()
-  const create = useMutation(api.document.create)
-  const archive = useMutation(api.document.archive)
+  const { user } = useUser();
+  const router = useRouter();
+  const create = useMutation(api.document.create);
+  const archive = useMutation(api.document.archive);
 
   const onArchive = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-    event.stopPropagation()
-    if(!id) return
-    const promise = archive({ id })
+    event.stopPropagation();
+    if (!id) return;
+    const promise = archive({ id });
 
     toast.promise(promise, {
-      loading: 'Moving to trash...',
-      success: 'Note moved to trash',
-      error: 'Failed to archive note.'
-    })
-  }
+      loading: "Moving to trash...",
+      success: "Note moved to trash",
+      error: "Failed to archive note.",
+    });
+  };
 
   const handleExpand = (
     event: React.MouseEvent<HTMLDivElement, MouseEvent>
@@ -69,22 +76,24 @@ export const Item = ({
     onExpand?.();
   };
 
-  const onCreate = (
-    event: React.MouseEvent<HTMLDivElement, MouseEvent>
-  ) => {
-    event.stopPropagation()
-    if(!id) return
-    const promise = create({title: 'Untitled', parentDocument: id})
-    .then((documentId) => {if(!expanded){onExpand?.()} 
-    // router.push(`/documents/${documentId}`) 
-  })
+  const onCreate = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    event.stopPropagation();
+    if (!id) return null;
+    const promise = create({ title: "Untitled", parentDocument: id }).then(
+      (documentId) => {
+        if (!expanded) {
+          onExpand?.();
+        }
+        router.push(`/documents/${documentId}`);
+      }
+    );
 
     toast.promise(promise, {
-      loading: 'Creating a new note...',
-      success: 'New note created!',
-      error: 'Failed to create a new note.'
-    })
-  }
+      loading: "Creating a new note...",
+      success: "New note created!",
+      error: "Failed to create a new note.",
+    });
+  };
 
   const ChevronIcon = expanded ? ChevronDown : ChevronRight;
 
@@ -92,7 +101,7 @@ export const Item = ({
     <div
       onClick={onClick}
       role="button"
-      style={{ paddingLeft: level ? `${(level * 12) + 12}px` : "12px" }}
+      style={{ paddingLeft: level ? `${level * 12 + 12}px` : "12px" }}
       className={cn(
         "group min-h-[27px] text-sm py-1 pr-3 w-full hover:bg-primary/5 flex items-center text-muted-foreground font-mediu",
         active && "bg-primary/5 text-primary"
@@ -101,7 +110,7 @@ export const Item = ({
       {!!id && (
         <div
           role="buton"
-          className="h-full rounded-sm hover:bg-neutral-300 dark:bg-neutral-600 mr-1"
+          className="h-full rounded-sm hover:bg-neutral-300 dark:hover:bg-neutral-600 mr-1"
           onClick={handleExpand}
         >
           <ChevronIcon className="h-4 w-4 shrink-0 text-muted-foreground/50" />
@@ -121,40 +130,37 @@ export const Item = ({
       {!!id && (
         <div className="ml-auto flex items-center gap-x-2">
           <DropdownMenu>
-            <DropdownMenuTrigger 
-            onClick={(e) => e.stopPropagation()}
-            asChild
-            >
+            <DropdownMenuTrigger onClick={(e) => e.stopPropagation()} asChild>
               <div
-              role="button"
-              className="opacity-0 group-hover:opacity-100 ml-auto h-full rounded-sm hover:bg-neutral-300 dark:hover:bg-neutral-600"
+                role="button"
+                className="opacity-0 group-hover:opacity-100 ml-auto h-full rounded-sm hover:bg-neutral-300 dark:hover:bg-neutral-600"
               >
-                <MoreHorizontal className="h-4 w-4 text-muted-foreground"/>
+                <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
               </div>
             </DropdownMenuTrigger>
-            <DropdownMenuContent 
-            className="w-60"
-            align="start"
-            side="right"
-            forceMount
+            <DropdownMenuContent
+              className="w-60"
+              align="start"
+              side="right"
+              forceMount
             >
               <DropdownMenuItem onClick={onArchive}>
-                  <Trash className="h-4 w-4 mr-2"/>
-                  Delete
+                <Trash className="h-4 w-4 mr-2" />
+                Delete
               </DropdownMenuItem>
-              <DropdownMenuSeparator/>
-                <div className="text-xs text-muted-foreground p-2">
-                  Last edited by: {user?.fullName}
-                </div>
+              <DropdownMenuSeparator />
+              <div className="text-xs text-muted-foreground p-2">
+                Last edited by: {user?.fullName}
+              </div>
             </DropdownMenuContent>
           </DropdownMenu>
-          <div 
-          role="button"
-          onClick={onCreate}
-          className="opacity-0 group-hover:opacity-100 ml-auto rounded-sm hover:bg-neutral-300 dark:hover:bg-neutral-600">
-            <Plus className="h-4 w-5 text-muted-foreground"/>
+          <div
+            role="button"
+            onClick={onCreate}
+            className="opacity-0 group-hover:opacity-100 ml-auto rounded-sm hover:bg-neutral-300 dark:hover:bg-neutral-600"
+          >
+            <Plus className="h-4 w-5 text-muted-foreground" />
           </div>
-
         </div>
       )}
     </div>
@@ -164,7 +170,7 @@ export const Item = ({
 Item.Skeleton = function ItemSkeleton({ level }: { level?: number }) {
   return (
     <div
-      style={{ paddingLeft: level ? `${(level * 12) + 12}px` : "12px" }}
+      style={{ paddingLeft: level ? `${level * 12 + 12}px` : "12px" }}
       className="flex gap-x-2 py-[3px]"
     >
       <Skeleton className="h-4 w-4" />
