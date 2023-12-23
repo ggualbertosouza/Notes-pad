@@ -23,5 +23,5 @@ link: https://notes-pad-v1.vercel.app/
 - ...
 
 ## Imagens
-<img src="https://ibb.co/JRFhQQ4" alt='Tela inicial'>
-<img src="https://ibb.co/Ycf9C8j" alt="Texto Alternativo">
+<img src="https://images2.imgbox.com/98/b1/zm3Mg9Hn_o.png" alt='Tela inicial'>
+<img src="https://images2.imgbox.com/70/e3/aV1DoQMP_o.png" alt='Tela inicial'>
